@@ -1,0 +1,19 @@
+[package]
+name = "voicemeeter-volume-sync"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+voicemeeter = "0.1.1"
+eyre = "0.6.8"
+fern = { version = "0.6.1", features = ["colored"] }
+chrono = "0.4.22"
+log = "0.4.17"
+windows = "0.19.0"
+crossbeam = "0.8.2"
+
+[dependencies.win32-coreaudio]
+git = "https://github.com/agausmann/win32-coreaudio-rs.git"
+rev = "d76bc003b75a39fbf4420740ce2b0bce4855fcf1"
