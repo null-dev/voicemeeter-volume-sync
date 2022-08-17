@@ -1,5 +1,9 @@
 mod vm;
 
+use std::{env, thread};
+use std::env::args;
+use std::process::{Command, Stdio};
+use std::time::Duration;
 use eyre::{Result, WrapErr};
 use fern::colors::ColoredLevelConfig;
 use log::{info, warn};
@@ -45,6 +49,29 @@ fn main() -> Result<()> {
 
     info!("Starting {APP_NAME} v{APP_VERSION}");
 
+    // This is necessary because the VoiceMeeter SDK will crash the program if VoiceMeeter is not
+    // running...
+    // Thanks VoiceMeeter...
+    if let Some("managed") = args().nth(1).as_deref() {
+        info!("Launched in managed mode.");
+        start()
+    } else {
+        info!("Launched in non-managed mode, booting managed program...");
+        loop {
+            let _ = Command::new(env::current_exe()?)
+                .arg("managed")
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .stdin(Stdio::inherit())
+                .spawn()?
+                .wait();
+            info!("Managed program crashed, booting it again in 5s...");
+            thread::sleep(Duration::from_secs(5));
+        }
+    }
+}
+
+fn start() -> Result<()> {
     let mut enumerator = DeviceEnumerator::new()
         .wrap_err("failed to setup device enumerator")?;
 
@@ -72,6 +99,7 @@ fn main() -> Result<()> {
         }
     }
 }
+
 fn setup_volume_cb(
     controller: &mut VoiceMeeterController,
     enumerator: &mut DeviceEnumerator,
